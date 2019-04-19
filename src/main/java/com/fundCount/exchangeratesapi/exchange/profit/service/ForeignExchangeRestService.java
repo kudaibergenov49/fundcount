@@ -9,16 +9,21 @@ import java.math.BigDecimal;
 
 @Service
 public class ForeignExchangeRestService {
+    private static final BigDecimal SPREAD = new BigDecimal(0.64);
     private RestTemplate restTemplate;
 
     public ForeignExchangeRestService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public BigDecimal diffRate(String date) {
+    public String profit(String date, Integer amount) {
+        if (date == null){
+            return "0";
+        }
         BigDecimal latestRate = getRate("RUB", null).getRates().get("RUB");
         BigDecimal dateRate = getRate("RUB", date).getRates().get("RUB");
-        return latestRate.subtract(dateRate);
+        BigDecimal diff = latestRate.subtract(dateRate).add(SPREAD);
+        return diff.multiply(new BigDecimal(amount)).toString();
     }
 
     private Rate getRate(String symbols, String date) {
